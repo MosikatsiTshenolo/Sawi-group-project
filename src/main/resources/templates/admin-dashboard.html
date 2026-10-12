@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Dashboard | SAWI</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f2f5f3; color: #24312d; font-family: "Segoe UI", sans-serif; }
+        header { position: relative; padding: 62px max(5vw, 20px) 22px; background: #174a43; color: white; }
+        header h1 { margin: 0; font-size: 25px; }
+        .logout-form { position: absolute; top: 12px; left: 20px; }
+        .logout-button { min-height: 36px; padding: 7px 12px; border: 1px solid white; border-radius: 4px; background: transparent; color: white; cursor: pointer; }
+        main { width: min(1200px, calc(100% - 36px)); margin: 28px auto; }
+        .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+        h2 { margin: 0; color: #174a43; font-size: 22px; }
+        a.button, button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 13px; border: 0; border-radius: 4px; background: #176d5b; color: white; font: inherit; font-weight: 650; text-decoration: none; cursor: pointer; }
+        button.remove { background: #a33c36; }
+        button.restore { background: #176d5b; }
+        .message { margin: 12px 0; padding: 12px; border-radius: 4px; }
+        .success { color: #145b43; background: #e6f4eb; }
+        .error { color: #8a2d2a; background: #fff0ed; }
+        .table-wrap { overflow-x: auto; background: white; border: 1px solid #d9e3dd; border-radius: 6px; }
+        table { width: 100%; min-width: 820px; border-collapse: collapse; }
+        th, td { padding: 12px 14px; border-bottom: 1px solid #e5ebe7; text-align: left; vertical-align: middle; }
+        th { background: #eaf1ed; color: #174a43; font-size: 13px; }
+        tr:last-child td { border-bottom: 0; }
+        .status { font-weight: 700; }
+        .inactive { color: #8a2d2a; }
+        .active { color: #176d5b; }
+        .empty { padding: 22px; color: #62726b; }
+        form { margin: 0; }
+        @media (max-width: 600px) { main { width: calc(100% - 24px); margin-top: 18px; } }
+    </style>
+</head>
+<body>
+<header>
+    <th:block th:replace="~{fragments/header-actions :: headerActions}"></th:block>
+    <h1>SAWI Administration</h1>
+</header>
+<main>
+    <div class="toolbar">
+        <h2>Registered accounts</h2>
+        <a class="button" th:href="@{/admin/staff}">Create staff account</a>
+    </div>
+    <div class="message success" th:if="${emailDeliveryConfigured}">
+        Email delivery is configured.
+    </div>
+    <div class="message error" th:unless="${emailDeliveryConfigured}">
+        Email delivery is not configured. Set MAIL_USERNAME and MAIL_PASSWORD before expecting approval or reset emails.
+    </div>
+    <section class="table-wrap" style="margin-bottom: 20px; padding: 18px;">
+        <h2>Student registrations awaiting approval</h2>
+        <p th:if="${#lists.isEmpty(pendingStudents)}" class="empty">No pending student registrations.</p>
+        <table th:if="${not #lists.isEmpty(pendingStudents)}">
+            <thead><tr><th>Student</th><th>Username</th><th>Email</th><th>Action</th></tr></thead>
+            <tbody>
+            <tr th:each="studentUser : ${pendingStudents}">
+                <td th:text="${studentUser.firstName + ' ' + studentUser.lastName}"></td>
+                <td th:text="${studentUser.username}"></td>
+                <td th:text="${studentUser.email}"></td>
+                <td>
+                    <form th:action="@{/admin/users/{id}/status(id=${studentUser.userId})}" method="post">
+                        <input type="hidden" name="active" value="true">
+                        <button type="submit">Approve and email student</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="table-wrap" style="margin-bottom: 20px; padding: 18px;">
+        <h2>Password-reset requests</h2>
+        <p class="empty" th:if="${#lists.isEmpty(pendingPasswordResets)}">No reset requests awaiting approval.</p>
+        <table th:if="${not #lists.isEmpty(pendingPasswordResets)}">
+            <thead><tr><th>User</th><th>Email</th><th>Requested</th><th>Action</th></tr></thead>
+            <tbody>
+            <tr th:each="reset : ${pendingPasswordResets}">
+                <td th:text="${reset.user.firstName + ' ' + reset.user.lastName}"></td>
+                <td th:text="${reset.user.email}"></td>
+                <td th:text="${#temporals.format(reset.requestedAt, 'dd MMM yyyy HH:mm')}"></td>
+                <td>
+                    <form th:action="@{/admin/password-resets/{id}/approve(id=${reset.requestId})}" method="post">
+                        <button type="submit">Approve and email reset link</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="table-wrap" style="margin-bottom: 20px; padding: 18px;">
+        <h2>Completed consultations this month</h2>
+        <p th:text="${consultationMonth + ': ' + totalMonthlyConsultations + ' distinct student(s) consulted'}"></p>
+        <p th:text="${completedConsultationCount + ' completed consultation(s)'}"></p>
+        <table th:if="${not #lists.isEmpty(monthlyConsultations)}">
+            <thead><tr><th>Staff member</th><th>Role</th><th>Distinct students</th><th>Consultations</th></tr></thead>
+            <tbody>
+            <tr th:each="summary : ${monthlyConsultations}">
+                <td th:text="${summary.staffName}"></td>
+                <td th:text="${summary.staffRole}"></td>
+                <td th:text="${summary.studentsConsulted}"></td>
+                <td th:text="${summary.consultationCount}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <p class="empty" th:if="${#lists.isEmpty(monthlyConsultations)}">
+            No consultations have been marked complete this month.
+        </p>
+        <div class="table-wrap" th:if="${not #lists.isEmpty(monthlyConsultations)}">
+            <h3>Consultation reports</h3>
+            <table>
+                <thead><tr><th>Student</th><th>Consultant</th><th>Completed</th><th>Report</th></tr></thead>
+                <tbody>
+                <tr th:each="consultation : ${completedConsultations}">
+                    <td th:text="${consultation.student.user.firstName + ' ' + consultation.student.user.lastName}"></td>
+                    <td th:text="${consultation.counselor != null ? consultation.counselor.user.firstName + ' ' + consultation.counselor.user.lastName : consultation.advisor.user.firstName + ' ' + consultation.advisor.user.lastName}"></td>
+                    <td th:text="${#temporals.format(consultation.completedAt, 'dd MMM yyyy HH:mm')}"></td>
+                    <td th:text="${consultation.consultationReport}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <div class="message success" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    <div class="table-wrap" th:if="${not #lists.isEmpty(users)}">
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Access</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="account : ${users}">
+                <td th:text="${account.firstName + ' ' + account.lastName}"></td>
+                <td th:text="${account.username}"></td>
+                <td th:text="${account.email}"></td>
+                <td th:text="${account.role.roleName}"></td>
+                <td class="status" th:classappend="${account.active} ? ' active' : ' inactive'"
+                    th:text="${account.active} ? 'Active' : 'Inactive / awaiting approval'"></td>
+                <td>
+                    <form th:action="@{/admin/users/{id}/status(id=${account.userId})}" method="post">
+                        <input type="hidden" name="active" th:value="${!account.active}">
+                        <button type="submit"
+                                th:classappend="${account.active} ? ' remove' : ' restore'"
+                                th:text="${account.active} ? 'Remove access' : (account.role.roleName == 'STUDENT' ? 'Approve student' : 'Restore access')"></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="table-wrap empty" th:if="${#lists.isEmpty(users)}">No accounts have been registered.</div>
+</main>
+</body>
+</html>

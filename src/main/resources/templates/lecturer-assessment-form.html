@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle + ' | SAWI'}">Add Assessment | SAWI</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f7fb;
+            color: #243247;
+        }
+
+        header {
+            background: #183b56;
+            color: white;
+            padding: 20px;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 11px;
+            margin-top: 7px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 22px;
+            padding: 12px 20px;
+            background: #183b56;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #245675;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            background: #fde8e8;
+            color: #991b1b;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .navigation {
+            margin-top: 20px;
+        }
+
+        a {
+            color: #183b56;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1 th:text="${'SAWI — ' + pageTitle}">SAWI — Add Assessment</h1>
+    <p>Create an assessment for one of your assigned modules.</p>
+</header>
+
+<main>
+    <h2 th:text="${pageTitle + ' Details'}">Assessment Details</h2>
+
+    <p class="message error"
+       th:if="${errorMessage != null}"
+       th:text="${errorMessage}"></p>
+
+    <p class="message success"
+       th:if="${successMessage != null}"
+       th:text="${successMessage}"></p>
+
+    <form th:action="@{/lecturer/assessments/save}" method="post">
+
+        <input type="hidden" name="assessmentId"
+               th:if="${assessment.assessmentId != null}"
+               th:value="${assessment.assessmentId}">
+
+        <label for="moduleId">Module</label>
+        <select id="moduleId" name="moduleId" required>
+            <option value="">-- Select Module --</option>
+            <option th:each="module : ${modules}"
+                    th:value="${module.moduleId}"
+                    th:selected="${assessment.module != null and module.moduleId == assessment.module.moduleId}"
+                    th:text="${module.moduleCode + ' - ' + module.moduleName}">
+            </option>
+        </select>
+
+        <label for="assessmentName">Assessment Name</label>
+        <input type="text"
+               id="assessmentName"
+               name="assessmentName"
+               maxlength="100"
+               placeholder="e.g. Test 2"
+               th:value="${assessment.assessmentName}"
+               required>
+
+        <label for="assessmentType">Assessment Type</label>
+        <select id="assessmentType" name="assessmentType" required>
+            <option value="">-- Select Type --</option>
+            <option value="Test" th:selected="${assessment.assessmentType == 'Test'}">Test</option>
+            <option value="Assignment" th:selected="${assessment.assessmentType == 'Assignment'}">Assignment</option>
+            <option value="Project" th:selected="${assessment.assessmentType == 'Project'}">Project</option>
+            <option value="Practical" th:selected="${assessment.assessmentType == 'Practical'}">Practical</option>
+            <option value="Exam" th:selected="${assessment.assessmentType == 'Exam'}">Exam</option>
+            <option value="Other" th:selected="${assessment.assessmentType == 'Other'}">Other</option>
+        </select>
+
+        <label for="description">Description and Instructions</label>
+        <textarea id="description"
+                  name="description"
+                  rows="4"
+                  maxlength="255"
+                  th:text="${assessment.description}"
+                  placeholder="Enter assessment instructions"></textarea>
+
+        <label for="dueDate">Due Date</label>
+        <input type="date"
+               id="dueDate"
+               name="dueDate"
+               th:value="${assessment.dueDate}"
+               th:min="${T(java.time.LocalDate).now()}"
+               required>
+
+        <label for="weight">Weight (%)</label>
+        <input type="number"
+               id="weight"
+               name="weight"
+               min="0"
+               max="100"
+               step="0.01"
+             th:value="${assessment.weight}"
+               placeholder="e.g. 25">
+
+         <button type="submit" th:text="${assessment.assessmentId == null ? 'Save Assessment' : 'Update Assessment'}">Save Assessment</button>
+    </form>
+
+    <div class="navigation">
+        <a th:href="@{/lecturer/dashboard}">Back to Lecturer Dashboard</a>
+    </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAWI | My Assessments</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #243247;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 22px 30px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header p {
+            margin-bottom: 0;
+            color: #dce8f7;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #1769aa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        th {
+            background: #eaf1f9;
+            color: #17365d;
+        }
+
+        .empty-message {
+            padding: 18px 0;
+            color: #627086;
+        }
+
+        .deadline-note {
+            display: block;
+            margin-top: 5px;
+            color: #52675d;
+            font-size: 13px;
+        }
+
+        .submission-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .submission-form input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .flash-message {
+            margin: 12px 0;
+            padding: 12px;
+            border-radius: 5px;
+            background: #e6f4eb;
+            color: #145b43;
+        }
+
+        @media (max-width: 650px) {
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>My Assessments</h1>
+    <p>Student Assessment and Wellness Integrator</p>
+</header>
+
+<main>
+
+    <a class="back-link" th:href="@{/dashboard}">
+        ← Back to Dashboard
+    </a>
+
+    <section class="panel">
+        <h2>Academic Assessment Overview</h2>
+
+        <p>
+            View your assessment details, due dates, and academic results
+            in one place.
+        </p>
+
+          <p class="flash-message" th:if="${submissionMessage}"
+              th:text="${submissionMessage}"></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Assessment</th>
+                    <th>Module Code</th>
+                    <th>Module Name</th>
+                    <th>Due Date</th>
+                    <th>Moodle Submission</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            
+        <tbody>
+            <tr th:each="assessment : ${assessments}">
+                <td th:text="${assessment.assessmentName}">
+                    Assessment name
+                </td>
+
+                <td th:text="${assessment.module.moduleCode}">Module code</td>
+                <td th:text="${assessment.module.moduleName}">Module name</td>
+
+                <td th:text="${assessment.dueDate}">
+                    Due date
+                </td>
+
+                    <td>
+                      <form class="submission-form"
+                          th:action="@{/assessments/{id}/submission(id=${assessment.assessmentId})}"
+                          method="post">
+                        <input type="checkbox"
+                               th:id="${'submitted-' + assessment.assessmentId}"
+                             name="submitted"
+                             value="true"
+                             th:checked="${gradesByAssessment[assessment.assessmentId] != null and gradesByAssessment[assessment.assessmentId].submitted}"
+                             onchange="this.form.submit()">
+                        <label th:for="${'submitted-' + assessment.assessmentId}"
+                             th:text="${'I submitted ' + assessment.assessmentName + ' in Moodle'}"></label>
+                      </form>
+                      <span class="deadline-note"
+                          th:if="${daysRemainingByAssessment[assessment.assessmentId] > 0}"
+                          th:text="${daysRemainingByAssessment[assessment.assessmentId]} + ' days left'"></span>
+                      <span class="deadline-note"
+                          th:if="${daysRemainingByAssessment[assessment.assessmentId] == 0}">
+                        Due today
+                      </span>
+                      <span class="deadline-note"
+                          th:if="${daysRemainingByAssessment[assessment.assessmentId] < 0}"
+                          th:text="${-daysRemainingByAssessment[assessment.assessmentId]} + ' days overdue'"></span>
+                    </td>
+
+                <td>
+                    <span th:if="${assessment.dueDate.isBefore(T(java.time.LocalDate).now())}">
+                        Overdue
+                    </span>
+                    <span th:if="${!assessment.dueDate.isBefore(T(java.time.LocalDate).now())}">
+                        Upcoming
+                    </span>
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(assessments)}">
+                <td colspan="6" class="empty-message">
+                    No assessments have been added yet.
+                </td>
+            </tr>
+        </tbody>
+
+        </table>
+    </section>
+
+</main>
+
+</body>
+</html>

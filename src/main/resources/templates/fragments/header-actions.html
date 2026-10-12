@@ -1,0 +1,67 @@
+<th:block th:fragment="headerActions">
+    <style>
+        .header-actions {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .notification-bell {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 36px;
+            border: 1px solid currentColor;
+            border-radius: 4px;
+            color: inherit;
+            font-size: 19px;
+            text-decoration: none;
+        }
+        .notification-count {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            border-radius: 9px;
+            background: #b83232;
+            color: white;
+            font: 700 11px/18px Arial, sans-serif;
+            text-align: center;
+        }
+        .account-logout-form { margin: 0; }
+        .account-logout-button {
+            min-height: 36px;
+            padding: 7px 12px;
+            border: 1px solid currentColor;
+            border-radius: 4px;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            font-weight: 650;
+            cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            .header-actions { right: 12px; }
+        }
+    </style>
+    <div class="header-actions">
+        <a class="notification-bell" th:href="@{/notifications}"
+           aria-label="Notifications" title="Notifications">
+            <span aria-hidden="true">&#128276;</span>
+            <span class="notification-count"
+                  th:if="${unreadNotificationCount > 0}"
+                  th:text="${unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}"></span>
+        </a>
+        <form class="account-logout-form" th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="account-logout-button" type="submit">Log out</button>
+        </form>
+    </div>
+</th:block>

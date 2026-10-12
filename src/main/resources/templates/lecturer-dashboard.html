@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Dashboard | SAWI</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f7fb;
+            color: #243247;
+        }
+
+        header {
+            position: relative;
+            background: #183b56;
+            color: white;
+            padding: 62px 22px 22px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .welcome {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #183b56;
+        }
+
+        .notice {
+            background: #eaf3f8;
+            padding: 14px;
+            border-radius: 6px;
+        }
+
+        .logout {
+            color: white;
+        }
+
+        .logout-form { position: absolute; top: 12px; left: 20px; }
+        .logout-button { padding: 8px 12px; border: 1px solid white; border-radius: 4px; background: transparent; color: white; cursor: pointer; }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; min-width: 760px; border-collapse: collapse; }
+        th, td { padding: 11px; border-bottom: 1px solid #e1e8ec; text-align: left; }
+        th { color: #183b56; background: #edf3f6; }
+        .action { color: #1769aa; font-weight: 700; }
+        .delete-button { padding: 7px 10px; border: 0; border-radius: 4px; background: #9c3732; color: white; cursor: pointer; }
+        .message { padding: 11px; border-radius: 5px; margin-bottom: 12px; }
+        .success { color: #166534; background: #dcfce7; }
+        .error { color: #991b1b; background: #fee2e2; }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>SAWI — Lecturer Dashboard</h1>
+    <p>Student Assessment and Wellness Integrator</p>
+    <th:block th:replace="~{fragments/header-actions :: headerActions}"></th:block>
+</header>
+
+<main>
+
+    <section class="welcome">
+        <h2>Welcome, Lecturer!</h2>
+        <p>Manage your modules and assessments from this dashboard.</p>
+    </section>
+
+    
+    <section class="card">
+        <h2>My Modules</h2>
+
+        <p th:if="${#lists.isEmpty(modules)}">
+            No modules have been assigned to you yet.
+        </p>
+
+        <div th:each="module : ${modules}">
+            <h3>
+                <span th:text="${module.moduleCode}">ICT301</span>
+                -
+                <span th:text="${module.moduleName}">
+                    Information and Communication Technology
+                </span>
+            </h3>
+
+            <p th:if="${module.description != null}"
+            th:text="${module.description}">
+            </p>
+
+            <p>
+                Credits:
+                <span th:text="${module.credits != null ? module.credits : 'Not specified'}">
+                    Not specified
+                </span>
+            </p>
+
+            <hr>
+        </div>
+    </section>
+
+
+    <section class="card">
+        <h2>Assessment Management</h2>
+        <p class="message success" th:if="${successMessage}" th:text="${successMessage}"></p>
+        <p class="message error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+        <p><a class="action" th:href="@{/lecturer/assessments/new}">Add assessment and deadline</a></p>
+        <p th:if="${#lists.isEmpty(assessmentProgress)}">No assessments have been created for your modules.</p>
+        <div class="table-wrap" th:if="${not #lists.isEmpty(assessmentProgress)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Assessment</th>
+                    <th>Module</th>
+                    <th>Deadline</th>
+                    <th>Enrolled</th>
+                    <th>Submitted</th>
+                    <th>Not submitted</th>
+                    <th>Manage</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="progress : ${assessmentProgress}">
+                    <td th:text="${progress.assessment.assessmentName}"></td>
+                    <td th:text="${progress.assessment.module.moduleCode}"></td>
+                    <td>
+                        <span th:text="${progress.assessment.dueDate}"></span><br>
+                        <small th:if="${progress.daysRemaining > 0}"
+                               th:text="${progress.daysRemaining + ' days left'}"></small>
+                        <small th:if="${progress.daysRemaining == 0}">Due today</small>
+                        <small th:if="${progress.daysRemaining < 0}"
+                               th:text="${-progress.daysRemaining + ' days overdue'}"></small>
+                    </td>
+                    <td th:text="${progress.enrolledCount}"></td>
+                    <td th:text="${progress.submittedCount}"></td>
+                    <td th:text="${progress.outstandingCount}"></td>
+                    <td>
+                        <a class="action"
+                           th:href="@{/lecturer/assessments/{id}/edit(id=${progress.assessment.assessmentId})}">Edit</a>
+                        <form th:action="@{/lecturer/assessments/{id}/delete(id=${progress.assessment.assessmentId})}"
+                              method="post" style="display:inline"
+                              onsubmit="return confirm('Delete this assessment? Assessments with student records cannot be deleted.');">
+                            <button class="delete-button" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>

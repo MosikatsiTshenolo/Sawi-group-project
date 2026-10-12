@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SAWI | Student Assessment and Wellness Integrator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #1e293b;
+            background: #f8fafc;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 18px 8%;
+            background: #123b5d;
+            color: white;
+        }
+
+        nav h2 {
+            margin: 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 18px;
+            font-weight: bold;
+        }
+
+        .hero {
+            padding: 85px 8%;
+            text-align: center;
+            background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+        }
+
+        .hero h1 {
+            color: #123b5d;
+            font-size: clamp(30px, 5vw, 48px);
+            margin-bottom: 18px;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .buttons {
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 25px;
+            margin: 6px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .primary {
+            background: #123b5d;
+            color: white;
+        }
+
+        .secondary {
+            border: 2px solid #123b5d;
+            color: #123b5d;
+        }
+
+        .features {
+            padding: 55px 8%;
+            text-align: center;
+        }
+
+        .features h2 {
+            color: #123b5d;
+            margin-bottom: 30px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+            margin-top: 25px;
+        }
+
+        .card {
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .card h3 {
+            color: #123b5d;
+        }
+
+        .card p {
+            line-height: 1.7;
+        }
+
+        footer {
+            text-align: center;
+            padding: 22px;
+            background: #123b5d;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                justify-content: center;
+                text-align: center;
+            }
+
+            nav a {
+                margin: 0 7px;
+            }
+
+            .hero {
+                padding: 55px 6%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <h2>SAWI</h2>
+
+    <div>
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/login}">Login</a>
+        <a th:href="@{/register}">Register</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <h1>Supporting Your Academic Success and Well-being</h1>
+
+    <p>
+        SAWI (Student Assessment and Wellness Integrator) helps students
+        keep track of assessments, monitor their well-being, and connect
+        with academic advisors and counsellors when they need support.
+    </p>
+
+    <div class="buttons">
+        <a class="btn primary" th:href="@{/register}">
+            Get Started
+        </a>
+
+        <a class="btn secondary" th:href="@{/login}">
+            Account Login
+        </a>
+    </div>
+</section>
+
+<section class="features">
+    <h2>What SAWI Offers</h2>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Academic Planning</h3>
+            <p>
+                Keep academic assessments and important deadlines
+                organised in one place.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Wellness Check-ins</h3>
+            <p>
+                Record your mood and reflect on stress, energy levels,
+                and sleep habits.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Student Support</h3>
+            <p>
+                Access a platform designed to help students connect
+                with academic and wellness support.
+            </p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>
+        &copy; 2026 SAWI — Student Assessment and Wellness Integrator
+    </p>
+    <p>Sol Plaatje University</p>
+</footer>
+
+</body>
+</html>

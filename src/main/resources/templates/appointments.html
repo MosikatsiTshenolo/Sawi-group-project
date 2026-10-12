@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments | SAWI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #123b5d;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1000px;
+            margin: 30px auto;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+        }
+
+        h2 {
+            color: #123b5d;
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px;
+            margin-top: 7px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin-top: 20px;
+            background: #123b5d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d557e;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #eaf1f7;
+            color: #123b5d;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 5px;
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: bold;
+        }
+
+        .navigation {
+            margin-bottom: 20px;
+        }
+
+        .navigation a {
+            color: #123b5d;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .empty {
+            color: #64748b;
+            padding: 12px 0;
+        }
+
+        @media (max-width: 600px) {
+            .panel {
+                padding: 17px;
+            }
+
+            th, td {
+                padding: 9px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>SAWI</h1>
+    <p>Student Assessment and Wellness Integrator</p>
+</header>
+
+<main class="container">
+
+    <div class="navigation">
+        <a th:href="@{/dashboard}">← Back to Dashboard</a>
+    </div>
+
+    <div class="panel">
+        <h2>Request an Appointment</h2>
+        <p>
+            Request academic advising or counselling.
+            Your request will remain pending until staff review it.
+        </p>
+
+        <div class="message success"
+             th:if="${successMessage}"
+             th:text="${successMessage}">
+        </div>
+
+        <div class="message error"
+             th:if="${errorMessage}"
+             th:text="${errorMessage}">
+        </div>
+
+        <form th:action="@{/appointments}"
+              th:object="${appointment}"
+              method="post">
+
+            <label for="appointmentType">Appointment Type</label>
+            <select id="appointmentType"
+                    th:field="*{appointmentType}"
+                    required>
+                <option value="">-- Select appointment type --</option>
+                <option value="Academic Advising">Academic Advising</option>
+                <option value="Counselling">Counselling</option>
+            </select>
+
+            <label for="appointmentDate">Preferred Date and Time</label>
+            <input id="appointmentDate"
+                   type="datetime-local"
+                   th:field="*{appointmentDate}"
+                   required>
+
+            <label for="notes">Reason for Appointment</label>
+            <textarea id="notes"
+                      th:field="*{notes}"
+                      rows="4"
+                      maxlength="500"
+                      placeholder="Briefly describe how we can help you."></textarea>
+
+            <button type="submit">Submit Appointment Request</button>
+        </form>
+    </div>
+
+    <div class="panel">
+        <h2>My Appointments</h2>
+
+        <p class="empty"
+           th:if="${#lists.isEmpty(appointments)}">
+            You have not submitted any appointment requests yet.
+        </p>
+
+        <div class="table-wrapper"
+             th:unless="${#lists.isEmpty(appointments)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Date and Time</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="item : ${appointments}">
+                    <td th:text="${#temporals.format(item.appointmentDate, 'dd MMM yyyy HH:mm')}">
+                        20 Oct 2026 10:00
+                    </td>
+
+                    <td th:text="${item.appointmentType}">
+                        Academic Advising
+                    </td>
+
+                    <td>
+                        <span class="status"
+                              th:text="${item.status}">
+                            PENDING
+                        </span>
+                    </td>
+
+                    <td th:text="${item.notes != null and !item.notes.isBlank() ? item.notes : 'No notes provided'}">
+                        No notes provided
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,310 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration | SAWI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #123b5d;
+            color: #fff;
+            padding: 22px;
+            text-align: center;
+        }
+
+        header h1, header p {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 560px;
+            margin: 35px auto;
+            padding: 28px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #123b5d;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            margin-top: 7px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 24px;
+            background: #123b5d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d557e;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .field-error {
+            color: #b91c1c;
+            font-size: 13px;
+        }
+
+        .notice {
+            padding: 12px;
+            margin-top: 14px;
+            border-radius: 6px;
+            color: #66511c;
+            background: #fff7df;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #123b5d;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>SAWI</h1>
+    <p>Student Assessment and Wellness Integrator</p>
+</header>
+
+<div class="container">
+    <h2>Create Your Account</h2>
+    <p>Complete the form below to register.</p>
+
+    <div class="message error"
+         th:if="${errorMessage}"
+         th:text="${errorMessage}">
+    </div>
+
+    <form th:action="@{/register}"
+          th:object="${registerRequest}"
+          method="post">
+
+        <label for="roleName">Register as</label>
+        <select id="roleName" th:field="*{roleName}" required>
+            <option value="STUDENT">Student</option>
+            <option value="LECTURER">Lecturer</option>
+            <option value="ADMIN">Admin</option>
+            <option value="ADVISOR">Advisor</option>
+            <option value="COUNSELOR">Counselor</option>
+        </select>
+
+        <div id="studentStudyFields">
+            <label for="studentFaculty">Faculty</label>
+            <select id="studentFaculty" name="faculty">
+                <option value="">-- Select faculty --</option>
+                <option th:each="faculty : ${studentFaculties}"
+                        th:value="${faculty}" th:text="${faculty}"></option>
+            </select>
+
+            <label for="course">Course</label>
+            <select id="course" name="course">
+                <option value="">-- Select course --</option>
+                <option th:each="courseOption : ${courses}"
+                        th:value="${courseOption}" th:text="${courseOption}"></option>
+            </select>
+
+            <label for="moduleId">Module</label>
+            <select id="moduleId" name="moduleId">
+                <option value="">-- Select module --</option>
+                <option th:each="module : ${modules}"
+                        th:value="${module.moduleId}"
+                        th:text="${module.moduleCode + ' - ' + module.moduleName}"></option>
+            </select>
+            <div class="field-error" th:if="${#lists.isEmpty(modules)}">
+                Modules are not available yet. You can register now and enroll after modules are added.
+            </div>
+        </div>
+
+        <div id="lecturerFacultyField" hidden>
+            <label for="lecturerFaculty">Faculty</label>
+            <select id="lecturerFaculty" name="faculty" disabled>
+                <option value="">-- Select faculty --</option>
+                <option th:each="faculty : ${lecturerFaculties}"
+                        th:value="${faculty}" th:text="${faculty}"></option>
+            </select>
+        </div>
+
+        <div id="advisorFacultyField" hidden>
+            <label for="advisorFaculty">Faculty</label>
+            <select id="advisorFaculty" name="faculty" disabled>
+                <option value="">-- Select faculty --</option>
+                <option th:each="faculty : ${advisorFaculties}"
+                        th:value="${faculty}" th:text="${faculty}"></option>
+            </select>
+        </div>
+
+        <label for="username">Username</label>
+        <input id="username" type="text"
+               th:field="*{username}" required>
+        <div class="field-error"
+             th:if="${#fields.hasErrors('username')}"
+             th:errors="*{username}"></div>
+
+        <label for="firstName">First Name</label>
+        <input id="firstName" type="text"
+               th:field="*{firstName}" required>
+
+        <label for="lastName">Last Name</label>
+        <input id="lastName" type="text"
+               th:field="*{lastName}" required>
+
+         <div id="studentNumberField">
+             <label for="studentNumber">Official SPU Student Number</label>
+             <input id="studentNumber" type="text"
+                 th:field="*{studentNumber}"
+                 maxlength="20"
+                 placeholder="Enter your official SPU student number">
+         </div>
+        <div class="field-error"
+             th:if="${#fields.hasErrors('studentNumber')}"
+             th:errors="*{studentNumber}"></div>
+
+         <div id="staffNumberField" hidden>
+             <label for="staffNumber">Staff Number</label>
+             <input id="staffNumber" type="text" th:field="*{staffNumber}" maxlength="20">
+
+             <label for="departmentOrSpecialization">Department or specialization</label>
+             <input id="departmentOrSpecialization" type="text"
+                 th:field="*{departmentOrSpecialization}" maxlength="100">
+         </div>
+
+        <label for="email">Email Address</label>
+        <input id="email" type="email"
+               th:field="*{email}" required>
+
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel"
+               th:field="*{phone}">
+
+        <label for="password">Password</label>
+        <input type="password"
+               th:field="*{password}" required>
+
+        <div class="notice" id="adminNotice" hidden>
+            Admin accounts can only be created by an existing administrator. Choose Login if you already have an admin account.
+        </div>
+
+        <div class="message error" id="staffOnlyNotice" hidden>
+            Lecturer, advisor, and counsellor profiles can only be created by an administrator. Please contact the SAWI administrator to register as staff.
+        </div>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="footer">
+        Already registered?
+        <a th:href="@{/login}">Log in here</a>
+        <p><a th:href="@{/}">Back to Home</a></p>
+    </div>
+</div>
+
+<script>
+    const roleSelect = document.getElementById("roleName");
+    const studentNumberField = document.getElementById("studentNumberField");
+    const staffNumberField = document.getElementById("staffNumberField");
+    const adminNotice = document.getElementById("adminNotice");
+    const staffOnlyNotice = document.getElementById("staffOnlyNotice");
+    const studentStudyFields = document.getElementById("studentStudyFields");
+    const lecturerFacultyField = document.getElementById("lecturerFacultyField");
+    const advisorFacultyField = document.getElementById("advisorFacultyField");
+    const submitButton = document.querySelector("form button[type='submit']");
+
+    function updateRegistrationFields() {
+        const isStudent = roleSelect.value === "STUDENT";
+        const isLecturer = roleSelect.value === "LECTURER";
+        const isAdvisor = roleSelect.value === "ADVISOR";
+        const isAdmin = roleSelect.value === "ADMIN";
+        const isStaff = isLecturer || isAdvisor || roleSelect.value === "COUNSELOR";
+        studentNumberField.hidden = !isStudent;
+        staffNumberField.hidden = isStudent || isAdmin;
+        studentStudyFields.hidden = !isStudent;
+        lecturerFacultyField.hidden = !isLecturer;
+        advisorFacultyField.hidden = !isAdvisor;
+        adminNotice.hidden = !isAdmin;
+        staffOnlyNotice.hidden = !isStaff;
+
+        const studentNumber = document.getElementById("studentNumber");
+        const staffNumber = document.getElementById("staffNumber");
+        const department = document.getElementById("departmentOrSpecialization");
+        studentNumber.required = isStudent;
+        studentNumber.disabled = !isStudent;
+        staffNumber.required = !isStudent && !isAdmin;
+        staffNumber.disabled = isStudent || isAdmin;
+        department.disabled = isStudent || isAdmin;
+        document.getElementById("studentFaculty").required = isStudent;
+        document.getElementById("studentFaculty").disabled = !isStudent;
+        document.getElementById("course").required = isStudent;
+        document.getElementById("course").disabled = !isStudent;
+        const moduleSelect = document.getElementById("moduleId");
+        moduleSelect.required = isStudent && moduleSelect.options.length > 1;
+        moduleSelect.disabled = !isStudent;
+        const lecturerFaculty = document.getElementById("lecturerFaculty");
+        lecturerFaculty.required = isLecturer;
+        lecturerFaculty.disabled = !isLecturer;
+        const advisorFaculty = document.getElementById("advisorFaculty");
+        advisorFaculty.required = isAdvisor;
+        advisorFaculty.disabled = !isAdvisor;
+        submitButton.disabled = false;
+    }
+
+    roleSelect.addEventListener("change", updateRegistrationFields);
+    updateRegistrationFields();
+</script>
+
+</body>
+</html>

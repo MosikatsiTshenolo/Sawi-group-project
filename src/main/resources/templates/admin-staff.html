@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | SAWI</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        header {
+            background: #123b5d;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+        .container {
+            max-width: 750px;
+            width: 92%;
+            margin: 30px auto;
+        }
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        }
+        h2 { color: #123b5d; }
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 15px 0 6px;
+        }
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        button {
+            margin-top: 22px;
+            padding: 12px 18px;
+            background: #123b5d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background: #1e527a; }
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .navigation a {
+            color: #123b5d;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .hint {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .faculty-fields[hidden] { display: none; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>SAWI Administration</h1>
+    <p>Student Assessment and Wellness Integrator</p>
+</header>
+
+<main class="container">
+    <p class="navigation">
+        <a th:href="@{/dashboard}">← Back to Dashboard</a>
+    </p>
+
+    <section class="panel">
+        <h2>Create Account</h2>
+        <p>Create an administrator, lecturer, advisor, or counsellor account.</p>
+
+        <div class="message success"
+             th:if="${successMessage}"
+             th:text="${successMessage}"></div>
+
+        <div class="message error"
+             th:if="${errorMessage}"
+             th:text="${errorMessage}"></div>
+
+        <form id="accountForm" th:action="@{/admin/staff}" method="post">
+            <label for="roleName">Account Role</label>
+            <select id="roleName" name="roleName" required>
+                <option value="">-- Select account role --</option>
+                    <option value="ADMIN">Administrator</option>
+                <option value="ADVISOR">Academic Advisor</option>
+                <option value="COUNSELOR">Counsellor</option>
+                <option value="LECTURER">Lecturer</option>
+            </select>
+
+            <label for="username">Username</label>
+            <input id="username" name="username"
+                   type="text" maxlength="100" required>
+
+            <label for="password">Temporary Password</label>
+            <input id="password" name="password"
+                   type="password" minlength="8" required>
+            <p class="hint">Use at least 8 characters. Give the password securely to the staff member.</p>
+
+            <label for="firstName">First Name</label>
+            <input id="firstName" name="firstName"
+                   type="text" required>
+
+            <label for="lastName">Last Name</label>
+            <input id="lastName" name="lastName"
+                   type="text" required>
+
+            <label for="email">Email Address</label>
+            <input id="email" name="email"
+                   type="email" required>
+
+            <label for="phone">Phone Number (optional)</label>
+            <input id="phone" name="phone" type="text">
+
+                 <label for="staffNumber">Staff Number</label>
+            <input id="staffNumber" name="staffNumber"
+                     type="text">
+
+                <div class="faculty-fields" id="lecturerFacultyField" hidden>
+                    <label for="lecturerFaculty">Lecturer Faculty</label>
+                    <select id="lecturerFaculty" name="faculty" disabled>
+                        <option value="">-- Select faculty --</option>
+                        <option value="ICT301">ICT301</option>
+                        <option value="Computer science">Computer science</option>
+                        <option value="Data science">Data science</option>
+                        <option value="BEd">BEd</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="BCom accounting">BCom accounting</option>
+                    </select>
+                </div>
+
+                <div class="faculty-fields" id="advisorFacultyField" hidden>
+                    <label for="advisorFaculty">Advisor Faculty</label>
+                    <select id="advisorFaculty" name="faculty" disabled>
+                        <option value="">-- Select faculty --</option>
+                        <option value="NAS">NAS</option>
+                        <option value="EDUCATION">EDUCATION</option>
+                        <option value="HUMANITIES">HUMANITIES</option>
+                        <option value="AGRICULTURE AND ECONOMICS">AGRICULTURE AND ECONOMICS</option>
+                    </select>
+                </div>
+
+            <label for="departmentOrSpecialization">
+                Department or Specialization (optional)
+            </label>
+            <input id="departmentOrSpecialization"
+                   name="departmentOrSpecialization" type="text">
+
+            <button type="submit">Create Account</button>
+        </form>
+    </section>
+</main>
+<script>
+    const roleSelect = document.getElementById("roleName");
+    const staffNumber = document.getElementById("staffNumber");
+    const lecturerFacultyField = document.getElementById("lecturerFacultyField");
+    const advisorFacultyField = document.getElementById("advisorFacultyField");
+    const lecturerFaculty = document.getElementById("lecturerFaculty");
+    const advisorFaculty = document.getElementById("advisorFaculty");
+
+    function updateStaffNumberRequirement() {
+        const isAdmin = roleSelect.value === "ADMIN";
+        const isLecturer = roleSelect.value === "LECTURER";
+        const isAdvisor = roleSelect.value === "ADVISOR";
+        staffNumber.required = !isAdmin;
+        staffNumber.disabled = isAdmin;
+        lecturerFacultyField.hidden = !isLecturer;
+        advisorFacultyField.hidden = !isAdvisor;
+        lecturerFaculty.required = isLecturer;
+        lecturerFaculty.disabled = !isLecturer;
+        advisorFaculty.required = isAdvisor;
+        advisorFaculty.disabled = !isAdvisor;
+    }
+
+    roleSelect.addEventListener("change", updateStaffNumberRequirement);
+    updateStaffNumberRequirement();
+</script>
+</body>
+</html>

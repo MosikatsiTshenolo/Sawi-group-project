@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | SAWI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #123b5d;
+            color: #fff;
+            text-align: center;
+            padding: 22px;
+        }
+
+        header h1, header p {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 430px;
+            margin: 55px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #123b5d;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 25px;
+            background: #123b5d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d557e;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .error {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .success {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 22px;
+        }
+
+        a {
+            color: #123b5d;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>SAWI</h1>
+    <p>Student Assessment and Wellness Integrator</p>
+</header>
+
+<div class="container">
+    <h2>Welcome Back</h2>
+    <p>Log in to access your SAWI account.</p>
+
+    <div class="message error"
+         th:if="${param.error}">
+        Invalid username or password. Please try again.
+    </div>
+
+    <div class="message success"
+         th:if="${param.logout}">
+        You have logged out successfully.
+    </div>
+
+    <div class="message success" th:if="${param.passwordReset}">
+        Password reset successfully. You can now log in.
+    </div>
+
+    <div class="message success"
+         th:if="${successMessage}"
+         th:text="${successMessage}">
+    </div>
+
+    <div class="message error" th:if="${param.roleMismatch}">
+        The selected account type does not match this account.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+
+        <label for="roleName">Log in as</label>
+        <select id="roleName" name="roleName" required>
+            <option value="STUDENT">Student</option>
+            <option value="LECTURER">Lecturer</option>
+            <option value="ADMIN">Admin</option>
+            <option value="ADVISOR">Advisor</option>
+            <option value="COUNSELOR">Counselor</option>
+        </select>
+
+        <label for="username">Username</label>
+        <input id="username"
+               name="username"
+               type="text"
+               autocomplete="username"
+               required>
+
+        <label for="password">Password</label>
+        <input id="password"
+               name="password"
+               type="password"
+               autocomplete="current-password"
+               required>
+
+         <p><a th:href="@{/forgot-password}">Forgot your password?</a></p>
+
+        <button type="submit">Log In</button>
+    </form>
+
+    <div class="footer">
+        Don't have an account?
+        <a th:href="@{/register}">Register here</a>
+
+        <p><a th:href="@{/}">Back to Home</a></p>
+    </div>
+</div>
+
+</body>
+</html>

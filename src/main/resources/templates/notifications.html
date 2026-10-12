@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications | SAWI</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f3f6f4; color: #263631; font-family: "Segoe UI", sans-serif; }
+        header { padding: 20px max(5vw, 18px); background: #174a43; color: white; }
+        header h1 { margin: 0; font-size: 24px; }
+        nav { display: flex; gap: 18px; padding: 13px max(5vw, 18px); background: white; border-bottom: 1px solid #dce5df; }
+        nav a { color: #176d5b; font-weight: 650; text-decoration: none; }
+        main { width: min(980px, calc(100% - 32px)); margin: 26px auto; }
+        h2 { margin: 0 0 6px; color: #174a43; font-size: 21px; }
+        .muted { margin-top: 0; color: #62736b; }
+        .panel { margin: 18px 0; padding: 20px; background: #fff; border: 1px solid #dce5df; border-radius: 6px; }
+        .notice { margin: 12px 0; padding: 12px; border-radius: 4px; }
+        .success { color: #145b43; background: #e6f4eb; }
+        .error { color: #8a2d2a; background: #fff0ed; }
+        label { display: block; margin: 12px 0 6px; font-weight: 650; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #bdccc6; border-radius: 4px; font: inherit; }
+        textarea { resize: vertical; }
+        button { min-height: 38px; margin-top: 12px; padding: 8px 13px; border: 0; border-radius: 4px; background: #176d5b; color: white; font: inherit; font-weight: 650; cursor: pointer; }
+        .item { padding: 15px 0; border-top: 1px solid #e2e9e4; }
+        .item:first-of-type { border-top: 0; }
+        .item h3 { display: inline; margin: 0; font-size: 17px; color: #174a43; }
+        .item.unread h3::after { content: "New"; display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 3px; background: #f1e8bd; color: #634f12; font-size: 11px; vertical-align: middle; }
+        .item p { margin: 8px 0; line-height: 1.5; white-space: pre-line; }
+        .meta { color: #6b7973; font-size: 13px; }
+        .empty { padding: 15px 0; color: #62736b; }
+        form.inline { display: inline; }
+        .reply-form { margin-top: 14px; max-width: 620px; }
+        .confirm-button { background: #a3332d; }
+        @media (max-width: 560px) { nav { flex-wrap: wrap; gap: 10px 16px; } .panel { padding: 15px; } }
+    </style>
+</head>
+<body>
+<header><h1>SAWI Notifications</h1></header>
+<nav>
+    <a th:href="@{/dashboard}">Dashboard</a>
+    <a th:href="@{/notifications}">Notifications</a>
+</nav>
+<main>
+    <div class="notice success" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="notice error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    <section class="panel" th:if="${canBroadcast}">
+        <h2>Send an update to students</h2>
+        <p class="muted">This update will be added to every active student’s notification inbox.</p>
+        <form th:action="@{/notifications/broadcast}" method="post">
+            <label for="title">Title</label>
+            <input id="title" name="title" maxlength="100" required>
+            <label for="message">Update</label>
+            <textarea id="message" name="message" rows="4" maxlength="500" required></textarea>
+            <button type="submit">Send to students</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Your inbox</h2>
+        <p class="muted" th:text="${unreadCount + ' unread update(s)'}"></p>
+        <div class="empty" th:if="${#lists.isEmpty(notifications)}">
+            No notifications yet.
+        </div>
+        <article class="item" th:each="notification : ${notifications}"
+                 th:classappend="${!notification.read} ? ' unread' : ''">
+            <h3 th:text="${notification.title}"></h3>
+            <p th:text="${notification.message}"></p>
+            <div class="meta">
+                <span th:text="${notification.notificationType != null ? notification.notificationType : 'SAWI'}"></span>
+                <span> · </span>
+                <time th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy HH:mm')}"></time>
+            </div>
+            <form class="inline" th:if="${!notification.read}"
+                  th:action="@{/notifications/{id}/read(id=${notification.notificationId})}"
+                  method="post">
+                <button type="submit">Mark as read</button>
+            </form>
+            <form class="inline"
+                  th:if="${notification.notificationType == 'EMERGENCY'
+                      and notification.relatedAppointment != null
+                      and notification.relatedAppointment.status == 'EMERGENCY_REQUESTED'}"
+                  th:action="@{/notifications/{id}/confirm-emergency(id=${notification.notificationId})}"
+                  method="post">
+                <button class="confirm-button" type="submit">Yes, I will attend</button>
+            </form>
+            <form class="reply-form" th:if="${notification.sender != null}"
+                  th:action="@{/notifications/{id}/reply(id=${notification.notificationId})}"
+                  method="post">
+                <label th:for="${'reply-' + notification.notificationId}">Reply or ask a question</label>
+                <textarea th:id="${'reply-' + notification.notificationId}"
+                          name="message" rows="2" maxlength="500" required></textarea>
+                <button type="submit">Send reply</button>
+            </form>
+        </article>
+    </section>
+</main>
+</body>
+</html>
